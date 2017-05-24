@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd" xmlns:tx="http://www.springframework.org/schema/tx">
+
+
+	<!-- 配置数据源,dbcp连接池 -->
+	<bean id="datasource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="username" value="scott"></property>
+		<property name="password" value="hatsunemiku"></property>
+		<property name="driverClassName" value="oracle.jdbc.OracleDriver"></property>
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:ORCL"></property>
+	</bean>
+	<!-- 配置sessionFactory -->
+	<bean id="sessionfactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="datasource"></property>
+		<!-- 配置hibernate的其他属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.Oracle9Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+			</props>
+		</property>
+		<!-- 配置hibernate的映射文件 -->
+		<property name="mappingResources">
+			<list>
+				<value>model/Dept1.hbm.xml</value>
+				<value>model/Emp1.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+	<property name="sessionFactory" ref="sessionfactory"></property>
+	</bean>
+	<!-- 配置事务增强 -->
+	<tx:advice id="txadvice" transaction-manager="transactionManager">
+		<tx:attributes>
+		<!-- 设置进行事务操作的方法匹配规则 -->
+			<tx:method name="emp*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- 开启注解事务@Transactional -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
